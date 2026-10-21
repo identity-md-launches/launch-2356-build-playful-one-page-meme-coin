@@ -1,0 +1,7 @@
+# Explicit ignore path budget: dependency directories at any depth, 0 submitted bytes.
+**/node_modules/
+# Explicit ignore path budget: Vite caches at any depth, 0 submitted bytes.
+**/.vite/
+# Explicit ignore path budget: disposable validation work under this single path, 0 submitted bytes.
+/test/scratch/
+# dist/ is a required deliverable and is deliberately included.

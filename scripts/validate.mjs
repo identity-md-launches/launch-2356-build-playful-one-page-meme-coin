@@ -3,7 +3,6 @@ import { createServer } from 'node:http';
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { extname, resolve, sep } from 'node:path';
 import { chromium, webkit } from 'playwright';
-const buyUrl = 'https://chore-ui-fix-launchpad.machinefun.workers.dev/project/Bke57gF8Mct';
 import AxeBuilder from '@axe-core/playwright';
 
 // Checks the real production export at a static-hosting subpath. No development server.
@@ -52,7 +51,7 @@ try {
   await page.evaluate(() => document.fonts.ready);
 
   await check('Intro film greets a new session paused under reduced motion and closes from the backdrop', async () => {
-    const film = page.getByRole('dialog', { name: 'Field test DNG-001' });
+    const film = page.getByRole('dialog', { name: 'JUST A TEST TOKEN' });
     await film.waitFor({ state: 'visible' });
     const video = film.locator('video');
     assert.equal(await video.evaluate((el) => el.paused), true);
@@ -63,7 +62,7 @@ try {
     assert.equal(axe.violations.length, 0, JSON.stringify(results.accessibility.at(-1)));
     await page.mouse.click(20, 20);
     await film.waitFor({ state: 'hidden' });
-    assert.equal(await page.evaluate(() => sessionStorage.getItem('dongle-film-seen')), '1');
+    await page.waitForFunction(() => sessionStorage.getItem('dongle-film-seen') === '1');
     await page.reload();
     await page.waitForTimeout(300);
     assert.equal(await page.locator('dialog[open]').count(), 0);
@@ -87,11 +86,30 @@ try {
 
   await check('390px first screen includes product and primary action', async () => {
     await page.setViewportSize({ width: 390, height: 844 });
-    const box = await page.getByRole('button', { name: 'BUY $DONGLE' }).boundingBox();
+    const box = await page.getByRole('button', { name: 'Read the test-token notice' }).boundingBox();
     const robotBox = await page.locator('.hero-robot').boundingBox();
-    assert(box && box.y >= 0 && box.y + box.height <= 844, `Buy action: ${JSON.stringify(box)}`);
+    assert(box && box.y >= 0 && box.y + box.height <= 844, `Notice action: ${JSON.stringify(box)}`);
     assert(robotBox && robotBox.y >= 0 && robotBox.y + robotBox.height <= 844);
-    return { buy: box, mascot: robotBox };
+    return { notice: box, mascot: robotBox };
+  });
+
+  await check('Bold test-token disclosure covers every section and no launch-platform link remains', async () => {
+    assert.match(await page.locator('h1').innerText(), /TEST TOKEN/);
+    for (const id of ['story', 'specs', 'manifesto', 'community', 'contract']) {
+      const notice = page.locator(`#${id} .test-token-notice`);
+      assert.match(await notice.innerText(), /JUST A TEST TOKEN\nLaunched only to test the platform\./);
+      const style = await notice.locator('strong').evaluate((el) => ({ weight: getComputedStyle(el).fontWeight, size: parseFloat(getComputedStyle(el).fontSize) }));
+      assert.equal(style.weight, '700');
+      assert(style.size >= 28);
+    }
+    assert.equal(await page.locator('footer .test-token-notice').count(), 1);
+    const hrefs = await page.locator('a[href]').evaluateAll((links) => links.map((link) => link.getAttribute('href')));
+    const permitted = /^(#|\.\/images\/dongle-share\.png$|https:\/\/twitter\.com\/intent\/tweet\?|https:\/\/t\.me\/share\/url\?)/;
+    assert(hrefs.every((href) => permitted.test(href)), JSON.stringify(hrefs));
+    assert.equal(await page.getByRole('button', { name: /buy/i }).count(), 0);
+    assert.match(await page.title(), /TEST TOKEN/);
+    assert.match(await page.locator('meta[name="description"]').getAttribute('content'), /launched only to test the platform/);
+    return 'Hero, five content sections, footer, allowed link destinations, metadata and 28px/700 section notices verified.';
   });
 
   await check('Mobile navigation opens, follows anchors and closes', async () => {
@@ -108,35 +126,38 @@ try {
     return 'Anchor navigation, expanded state, Escape and focus return passed.';
   });
 
-  await check('Buy flow shows the Solana mint, links to machine.fun, traps focus and Escape restores trigger', async () => {
-    const buy = page.getByRole('button', { name: 'BUY $DONGLE' });
-    await buy.click();
+  await check('Test-token notice shows the existing mint, traps focus and Escape restores trigger', async () => {
+    const notice = page.getByRole('button', { name: 'Read the test-token notice' });
+    await notice.click();
     const dialog = page.getByRole('dialog');
     await dialog.waitFor({ state: 'visible' });
     assert.equal(await dialog.locator('code').innerText(), '7i5fZty1GFryS5ZWqUFRPstfiQDhvNmoFjwaTqb5w1q7');
-    const trade = dialog.getByRole('link', { name: 'Buy on machine.fun' });
-    assert.equal(await trade.getAttribute('href'), buyUrl);
-    assert.equal(await trade.getAttribute('target'), '_blank');
+    assert.match(await dialog.innerText(), /launched only to test the platform/);
+    assert.equal(await dialog.getByRole('link').count(), 0);
     for (let i = 0; i < 7; i++) {
       await page.keyboard.press('Tab');
       assert(await dialog.evaluate((el) => el.contains(document.activeElement)));
     }
-    await page.screenshot({ path: `${output}/buy-dialog.webp`, type: 'webp', quality: 85 });
+    await page.screenshot({ path: `${output}/notice-dialog.webp`, type: 'webp', quality: 85 });
     const axe = await new AxeBuilder({ page }).analyze();
-    results.accessibility.push({ state: 'buy dialog', violations: axe.violations.map(({ id, impact, nodes }) => ({ id, impact, nodes: nodes.map((n) => n.target) })) });
+    results.accessibility.push({ state: 'notice dialog', violations: axe.violations.map(({ id, impact, nodes }) => ({ id, impact, nodes: nodes.map((n) => n.target) })) });
     assert.equal(axe.violations.length, 0, JSON.stringify(results.accessibility.at(-1)));
     await page.keyboard.press('Escape');
-    assert(await buy.evaluate((el) => el === document.activeElement));
-    await buy.click();
-    await dialog.getByRole('button', { name: 'Back to the factory' }).click();
-    assert(await buy.evaluate((el) => el === document.activeElement));
+    assert(await notice.evaluate((el) => el === document.activeElement));
+    await notice.click();
+    await dialog.getByRole('button', { name: 'Back to the site' }).click();
+    assert(await notice.evaluate((el) => el === document.activeElement));
+    await notice.click();
+    await dialog.getByRole('button', { name: 'View test-token address' }).click();
+    assert.equal(new URL(page.url()).hash, '#contract');
+    await page.waitForFunction(() => document.activeElement?.id === 'contract-heading');
     assert.equal(await page.locator('#contract code').innerText(), '7i5fZty1GFryS5ZWqUFRPstfiQDhvNmoFjwaTqb5w1q7');
     assert.match(await page.locator('#contract').innerText(), /Solana token mint address/);
-    return 'Full mint in dialog and contract section; outbound buy link; modal, focus trap and both dismissals passed.';
+    return 'Existing mint unchanged; no outbound link in notice; Tab loop, Escape, close button and focus return passed.';
   });
 
   await check('Technical specs anchor and simulation pending, success and repeat states', async () => {
-    await page.getByRole('link', { name: 'READ THE TECHNICAL SPECS' }).click();
+    await page.getByRole('link', { name: 'Explore the robot' }).click();
     assert.equal(new URL(page.url()).hash, '#specs');
     const run = page.getByRole('button', { name: 'Run a torque test' });
     await run.click();
@@ -150,26 +171,28 @@ try {
   });
 
   await check('Share links carry page URL and use real platform share endpoints', async () => {
-    const x = new URL(await page.getByRole('link', { name: /Spread the word on X/ }).getAttribute('href'));
-    const telegram = new URL(await page.getByRole('link', { name: /Send it to the group chat/ }).getAttribute('href'));
+    const x = new URL(await page.getByRole('link', { name: /Share the notice on X/ }).getAttribute('href'));
+    const telegram = new URL(await page.getByRole('link', { name: /Send the notice on Telegram/ }).getAttribute('href'));
     assert.equal(x.host, 'twitter.com'); assert.equal(x.pathname, '/intent/tweet');
     assert.equal(telegram.host, 't.me'); assert.equal(telegram.pathname, '/share/url');
     assert.equal(x.searchParams.get('url'), url); assert.equal(telegram.searchParams.get('url'), url);
-    return 'Destinations and encoded current URL verified; no fabricated social handles.';
+    assert.match(x.searchParams.get('text'), /TEST TOKEN, launched only to test the platform/);
+    assert.equal(x.searchParams.get('text'), telegram.searchParams.get('text'));
+    return 'Destinations, test-token copy and encoded current URL verified; no fabricated social handles.';
   });
 
   await check('Share card download, clipboard success and fallback', async () => {
-    await page.getByRole('button', { name: /Take a little confidence/ }).click();
+    await page.getByRole('button', { name: /Get the test-token card/ }).click();
     const dialog = page.getByRole('dialog');
     assert(await dialog.locator('img').evaluate((img) => img.complete && img.naturalWidth === 1200));
     const downloadPromise = page.waitForEvent('download');
     await dialog.getByRole('link', { name: 'Download share card' }).click();
     const download = await downloadPromise;
-    assert.equal(download.suggestedFilename(), 'dongle-small-shaft-massive-torque.png');
+    assert.equal(download.suggestedFilename(), 'dongle-test-token-notice.png');
     assert.equal(await download.failure(), null);
     await context.grantPermissions(['clipboard-read', 'clipboard-write']);
     await dialog.getByRole('button', { name: 'Copy page link' }).click();
-    await dialog.getByText('Factory link copied. Send in the crew.').waitFor();
+    await dialog.getByText('Notice link copied.').waitFor();
     assert.equal(await page.evaluate(() => navigator.clipboard.readText()), url);
     await page.evaluate(() => Object.defineProperty(navigator.clipboard, 'writeText', { configurable: true, value: async () => { throw new Error('Permission denied'); } }));
     await dialog.getByRole('button', { name: 'Copy page link' }).click();
@@ -201,7 +224,7 @@ try {
 
   await check('Reduced motion stops graphical animation', async () => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.getByRole('link', { name: 'READ THE TECHNICAL SPECS' }).click();
+    await page.getByRole('link', { name: 'Explore the robot' }).click();
     await page.getByRole('button', { name: /Run a torque test|Run it again/ }).click();
     await page.getByText('Test complete. 2 mm traveled. Ego unchanged.').waitFor();
     await page.getByRole('button', { name: 'Run it again' }).click();
@@ -216,9 +239,9 @@ try {
   await check('Primary hover contrast and inverse-panel keyboard focus', async () => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto(url);
-    const buy = page.getByRole('button', { name: 'BUY $DONGLE' });
-    await buy.hover();
-    const ratio = await buy.evaluate((el) => {
+    const notice = page.getByRole('button', { name: 'Read the test-token notice' });
+    await notice.hover();
+    const ratio = await notice.evaluate((el) => {
       const luminance = (color) => color.match(/[\d.]+/g).slice(0, 3).map(Number).map((v) => v / 255).map((v) => v <= .04045 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4).reduce((sum, v, i) => sum + v * [.2126, .7152, .0722][i], 0);
       const style = getComputedStyle(el);
       const colors = [luminance(style.color), luminance(style.backgroundColor)].sort((a, b) => b - a);
@@ -254,14 +277,14 @@ try {
   const moving = await motion.newPage();
   moving.setDefaultTimeout(8000);
   moving.on('pageerror', (error) => results.pageErrors.push(error.message));
-  await check('Intro film autoplays muted at 390px with the buy action on screen', async () => {
+  await check('Intro film autoplays muted at 390px with the notice action on screen', async () => {
     await moving.goto(url);
-    const film = moving.getByRole('dialog', { name: 'Field test DNG-001' });
+    const film = moving.getByRole('dialog', { name: 'JUST A TEST TOKEN' });
     await film.waitFor({ state: 'visible' });
     const video = film.locator('video');
     await moving.waitForFunction(() => document.querySelector('.film-video').currentTime > 1);
     assert.equal(await video.evaluate((el) => el.muted && el.controls && !el.paused), true);
-    const boxes = { video: await video.boundingBox(), buy: await film.getByRole('button', { name: 'BUY $DONGLE' }).boundingBox(), skip: await film.getByRole('button', { name: 'Skip to the site' }).boundingBox() };
+    const boxes = { video: await video.boundingBox(), notice: await film.getByRole('button', { name: 'Read the notice', exact: true }).boundingBox(), skip: await film.getByRole('button', { name: 'Skip to the site' }).boundingBox() };
     for (const box of Object.values(boxes)) assert(box && box.y >= 0 && box.y + box.height <= 844 && box.x >= 0 && box.x + box.width <= 390, JSON.stringify(boxes));
     await moving.screenshot({ path: `${output}/390-film.webp`, type: 'webp', quality: 85 });
     await moving.keyboard.press('Escape');
@@ -269,12 +292,12 @@ try {
     assert.equal(await moving.locator('.film-video').evaluate((el) => el.paused), true);
     return boxes;
   });
-  await check('Play the film reopens it, Skip returns focus, Buy hands off to the buy dialog', async () => {
+  await check('Play the film reopens it, Skip returns focus, Read hands off to the notice dialog', async () => {
     const trigger = moving.getByRole('button', { name: 'Play the film' });
     const box = await trigger.boundingBox();
     assert(box && box.y + box.height <= 844, `Trigger: ${JSON.stringify(box)}`);
     await trigger.click();
-    const film = moving.getByRole('dialog', { name: 'Field test DNG-001' });
+    const film = moving.getByRole('dialog', { name: 'JUST A TEST TOKEN' });
     await film.waitFor({ state: 'visible' });
     await moving.waitForFunction(() => !document.querySelector('.film-video').paused);
     await film.getByRole('button', { name: 'Skip to the site' }).click();
@@ -284,12 +307,12 @@ try {
     await film.getByRole('button', { name: 'Close film' }).click();
     await film.waitFor({ state: 'hidden' });
     await trigger.click();
-    await film.getByRole('button', { name: 'BUY $DONGLE' }).click();
-    const buyDialog = moving.getByRole('dialog', { name: 'Review the launch details.' });
-    await buyDialog.waitFor({ state: 'visible' });
+    await film.getByRole('button', { name: 'Read the notice', exact: true }).click();
+    const noticeDialog = moving.getByRole('dialog', { name: 'Just a test token.' });
+    await noticeDialog.waitFor({ state: 'visible' });
     await moving.keyboard.press('Escape');
     assert(await moving.locator('.hero-actions .primary').evaluate((el) => el === document.activeElement));
-    return 'Replay, skip, close button and buy hand-off passed with focus restored.';
+    return 'Replay, skip, close button and notice hand-off passed with focus restored.';
   });
   await motion.close();
 
@@ -298,20 +321,20 @@ try {
     safari = await webkit.launch({ headless: true });
   } catch (error) {
     const libraries = [...new Set(error.message.match(/lib[^\s║]+\.so(?:\.[0-9]+)*/g) ?? [])];
-    results.limits.push(`WebKit could not launch: ${libraries.length ? `missing host libraries: ${libraries.join(', ')}` : error.message.split('\n').filter(Boolean).slice(0, 4).join(' ')}`);
+    results.limits.push(`WebKit could not launch: ${libraries.length ? `missing host libraries: ${libraries.join(', ')}` : error.message.includes("Executable doesn't exist") ? 'browser executable unavailable' : 'browser runtime unavailable'}.`);
   }
   if (safari) {
     await check('WebKit mobile primary interactions', async () => {
       const page = await safari.newPage({ viewport: { width: 390, height: 844 } });
       await page.goto(url);
       await page.getByRole('button', { name: 'Skip to the site' }).click();
-      await page.getByRole('button', { name: 'BUY $DONGLE' }).click();
+      await page.getByRole('button', { name: 'Read the test-token notice' }).click();
       await page.getByRole('dialog').waitFor({ state: 'visible' });
       await page.keyboard.press('Escape');
-      await page.getByRole('link', { name: 'READ THE TECHNICAL SPECS' }).click();
+      await page.getByRole('link', { name: 'Explore the robot' }).click();
       await page.getByRole('button', { name: 'Run a torque test' }).click();
       await page.getByText('Test complete. 2 mm traveled. Ego unchanged.').waitFor();
-      return 'Buy dialog, Escape, anchor navigation and simulation passed.';
+      return 'Test-token notice, Escape, anchor navigation and simulation passed.';
     });
     await safari.close();
   }

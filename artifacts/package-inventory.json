@@ -1,0 +1,236 @@
+{
+  "byteLimit": 8388608,
+  "totalFileBytes": 4042882,
+  "fileCount": 56,
+  "scope": "Complete Git deliverable file set, including this inventory; excludes assignment inputs and disposable test/scratch output.",
+  "exportBytes": 1812294,
+  "artifactsBudgetBytes": 1048576,
+  "artifactsBytes": 609132,
+  "forbiddenOrDependencyArtifacts": [],
+  "files": [
+    {
+      "path": ".gitignore",
+      "bytes": 653
+    },
+    {
+      "path": "DESIGN.md",
+      "bytes": 11511
+    },
+    {
+      "path": "README.md",
+      "bytes": 5789
+    },
+    {
+      "path": "THIRD_PARTY.md",
+      "bytes": 2021
+    },
+    {
+      "path": "artifacts/ASSETS.md",
+      "bytes": 1288
+    },
+    {
+      "path": "artifacts/design-probe.json",
+      "bytes": 11374
+    },
+    {
+      "path": "artifacts/interaction-results.json",
+      "bytes": 6016
+    },
+    {
+      "path": "artifacts/package-inventory.json",
+      "bytes": 4718
+    },
+    {
+      "path": "artifacts/screenshots/desktop-full.webp",
+      "bytes": 256216
+    },
+    {
+      "path": "artifacts/screenshots/mobile-film.webp",
+      "bytes": 25638
+    },
+    {
+      "path": "artifacts/screenshots/mobile-first-screen.webp",
+      "bytes": 35660
+    },
+    {
+      "path": "artifacts/screenshots/mobile-full.webp",
+      "bytes": 195622
+    },
+    {
+      "path": "artifacts/screenshots/notice-dialog.webp",
+      "bytes": 18250
+    },
+    {
+      "path": "artifacts/screenshots/testbench-focus.webp",
+      "bytes": 40116
+    },
+    {
+      "path": "artifacts/validation.md",
+      "bytes": 14234
+    },
+    {
+      "path": "dist/assets/barlow-condensed-latin-700-normal-v1xN8_Wq.woff2",
+      "bytes": 22444
+    },
+    {
+      "path": "dist/assets/barlow-latin-400-normal-qiz4-Cze.woff2",
+      "bytes": 22196
+    },
+    {
+      "path": "dist/assets/barlow-latin-600-normal-DILqtrty.woff2",
+      "bytes": 22772
+    },
+    {
+      "path": "dist/assets/barlow-latin-700-normal-A9pxMQ4z.woff2",
+      "bytes": 22788
+    },
+    {
+      "path": "dist/assets/dongle-nRXR9XmU.webp",
+      "bytes": 180124
+    },
+    {
+      "path": "dist/assets/ibm-plex-mono-latin-400-normal-DMJ8VG8y.woff2",
+      "bytes": 14708
+    },
+    {
+      "path": "dist/assets/index-BoahdzG0.js",
+      "bytes": 246125
+    },
+    {
+      "path": "dist/assets/index-E_DxfS08.css",
+      "bytes": 31758
+    },
+    {
+      "path": "dist/favicon.svg",
+      "bytes": 476
+    },
+    {
+      "path": "dist/images/dongle-share.png",
+      "bytes": 244754
+    },
+    {
+      "path": "dist/index.html",
+      "bytes": 1864
+    },
+    {
+      "path": "dist/media/dongle-film-poster.webp",
+      "bytes": 37746
+    },
+    {
+      "path": "dist/media/dongle-film.mp4",
+      "bytes": 504587
+    },
+    {
+      "path": "dist/media/dongle-film.webm",
+      "bytes": 459952
+    },
+    {
+      "path": "index.html",
+      "bytes": 1764
+    },
+    {
+      "path": "licenses/barlow-OFL.txt",
+      "bytes": 6014
+    },
+    {
+      "path": "licenses/barlow-condensed-OFL.txt",
+      "bytes": 6167
+    },
+    {
+      "path": "licenses/design-guidance.txt",
+      "bytes": 11964
+    },
+    {
+      "path": "licenses/ibm-plex-mono-OFL.txt",
+      "bytes": 5299
+    },
+    {
+      "path": "licenses/react-MIT.txt",
+      "bytes": 1088
+    },
+    {
+      "path": "package-lock.json",
+      "bytes": 40850
+    },
+    {
+      "path": "package.json",
+      "bytes": 708
+    },
+    {
+      "path": "public/favicon.svg",
+      "bytes": 476
+    },
+    {
+      "path": "public/images/dongle-share.png",
+      "bytes": 244754
+    },
+    {
+      "path": "public/media/dongle-film-poster.webp",
+      "bytes": 37746
+    },
+    {
+      "path": "public/media/dongle-film.mp4",
+      "bytes": 504587
+    },
+    {
+      "path": "public/media/dongle-film.webm",
+      "bytes": 459952
+    },
+    {
+      "path": "scripts/film/film.html",
+      "bytes": 9147
+    },
+    {
+      "path": "scripts/render-film.mjs",
+      "bytes": 3387
+    },
+    {
+      "path": "scripts/render-share.mjs",
+      "bytes": 2488
+    },
+    {
+      "path": "scripts/validate.mjs",
+      "bytes": 22089
+    },
+    {
+      "path": "src/App.tsx",
+      "bytes": 23257
+    },
+    {
+      "path": "src/assets/dongle.webp",
+      "bytes": 180124
+    },
+    {
+      "path": "src/config.ts",
+      "bytes": 330
+    },
+    {
+      "path": "src/fonts.css",
+      "bytes": 1001
+    },
+    {
+      "path": "src/icons.tsx",
+      "bytes": 1758
+    },
+    {
+      "path": "src/main.tsx",
+      "bytes": 253
+    },
+    {
+      "path": "src/styles.css",
+      "bytes": 35675
+    },
+    {
+      "path": "src/vite-env.d.ts",
+      "bytes": 38
+    },
+    {
+      "path": "tsconfig.json",
+      "bytes": 449
+    },
+    {
+      "path": "vite.config.ts",
+      "bytes": 117
+    }
+  ]
+}

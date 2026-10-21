@@ -1,6 +1,6 @@
 # Third-party notices
 
-The site’s original layout, copy adaptations, SVG artwork, and generated mascot were made for this assignment. The requester supplied the $DONGLE concept, slogans, and image reference. Asset details and the generation prompt are in `artifacts/ASSETS.md`.
+The site’s original layout, SVG artwork and generated mascot were supplied in the existing $DONGLE project. This revision updates the notice copy and reuses that artwork in the share image and video. Asset provenance and regeneration details are in `artifacts/ASSETS.md`; the original image-generation prompt was not supplied.
 
 ## Bundled runtime materials
 

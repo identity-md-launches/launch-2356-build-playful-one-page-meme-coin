@@ -14,7 +14,11 @@ const specs = [
   ['Emotional stability', 'Industrial grade', 'Dimensionally challenged only.'],
 ];
 
-type DialogKind = 'buy' | 'share' | null;
+type DialogKind = 'notice' | 'share' | null;
+
+function TestNotice() {
+  return <p className="test-token-notice"><strong>JUST A TEST TOKEN</strong><span>Launched only to test the platform.</span></p>;
+}
 
 export function App() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -28,11 +32,10 @@ export function App() {
   const film = useRef<HTMLDialogElement>(null);
   const filmVideo = useRef<HTMLVideoElement>(null);
   const filmTrigger = useRef<HTMLElement | null>(null);
-  const filmNext = useRef<'buy' | null>(null);
-  const heroBuy = useRef<HTMLButtonElement>(null);
+  const filmNext = useRef<'notice' | null>(null);
+  const heroNotice = useRef<HTMLButtonElement>(null);
 
-  const shareText = 'Small shaft. Massive torque. Meet $DONGLE: micro hardware. macro ego.';
-  const launchReady = Boolean(launch.buyUrl && launch.contractAddress);
+  const shareText = '$DONGLE was just a TEST TOKEN, launched only to test the platform.';
   const shareUrl = new URL(window.location.href);
   shareUrl.hash = '';
   const xShare = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl.href)}`;
@@ -100,18 +103,18 @@ export function App() {
     filmVideo.current?.pause();
     document.body.style.overflow = '';
     try { sessionStorage.setItem(filmSeenKey, '1'); } catch { /* storage blocked */ }
-    if (filmNext.current === 'buy') {
+    if (filmNext.current === 'notice') {
       filmNext.current = null;
-      lastTrigger.current = heroBuy.current;
+      lastTrigger.current = heroNotice.current;
       setCopyStatus('');
-      setDialog('buy');
+      setDialog('notice');
     } else {
       filmTrigger.current?.focus();
     }
   }
 
-  function buyFromFilm() {
-    filmNext.current = 'buy';
+  function noticeFromFilm() {
+    filmNext.current = 'notice';
     closeFilm();
   }
 
@@ -179,23 +182,23 @@ export function App() {
         <nav className="desktop-nav" aria-label="Main navigation">
           <a href="#story">The story</a><a href="#specs">Technical specs</a><a href="#manifesto">Manifesto</a>
         </nav>
-        <a className="header-join" href="#community">Join the crew <Icon name="arrowUp" /></a>
+        <a className="header-join" href="#main">Read the notice <Icon name="arrowUp" /></a>
         <button id="menu-toggle" className="icon-button menu-toggle" type="button" aria-label={menuOpen ? 'Close menu' : 'Open menu'} aria-expanded={menuOpen} aria-controls="mobile-nav" onClick={() => setMenuOpen(!menuOpen)}><Icon name={menuOpen ? 'close' : 'menu'} /></button>
         {menuOpen && <nav id="mobile-nav" className="mobile-nav" aria-label="Mobile navigation">
-          {[['The story', 'story'], ['Technical specs', 'specs'], ['Manifesto', 'manifesto'], ['Join the crew', 'community']].map(([label, id]) => <a key={id} href={`#${id}`} onClick={() => setMenuOpen(false)}>{label}<Icon name="arrow" /></a>)}
+          {[['The story', 'story'], ['Technical specs', 'specs'], ['Manifesto', 'manifesto'], ['Share the notice', 'community']].map(([label, id]) => <a key={id} href={`#${id}`} onClick={() => setMenuOpen(false)}>{label}<Icon name="arrow" /></a>)}
         </nav>}
       </header>
 
       <main id="main">
         <section className="hero shell" aria-labelledby="hero-title">
           <div className="hero-copy">
-            <h1 id="hero-title"><span>SMALL SHAFT.</span><span className="accent">MASSIVE</span><span className="accent">TORQUE.</span></h1>
-            <p className="hero-description">The world’s smallest autonomous<br className="desktop-break" /> robotic actuator.</p>
+            <h1 id="hero-title"><span>$DONGLE.</span><span>JUST A</span><span className="accent">TEST TOKEN.</span></h1>
+            <p className="hero-description">$DONGLE was launched only to test the platform.</p>
             <div className="hero-actions">
-              <button ref={heroBuy} className="button primary" type="button" onClick={() => openDialog('buy')}>BUY $DONGLE <Icon name="arrowUp" /></button>
-              <a className="spec-link" href="#specs">READ THE TECHNICAL SPECS <Icon name="arrow" /></a>
+              <button ref={heroNotice} className="button primary" type="button" onClick={() => openDialog('notice')}>Read the test-token notice <Icon name="arrow" /></button>
+              <a className="spec-link" href="#specs">Explore the robot <Icon name="arrow" /></a>
             </div>
-            <p className="hero-footnote"><span className="status-dot" />Tiny hardware. Excessive self-belief.</p>
+            <p className="hero-footnote"><span className="status-dot" />Platform testing only.</p>
           </div>
 
           <div className="hero-visual" aria-label="Meet Dongle, the tiny robot">
@@ -206,7 +209,6 @@ export function App() {
               <div className="orbit" aria-hidden="true" />
               <img className="hero-robot" src={robot} width="1000" height="1048" alt="Dongle: a tiny orange factory robot with angry, determined eyes, a huge yellow hard hat, and a comically small silver actuator." fetchPriority="high" />
               <div className="annotation helmet-note"><span>Oversized helmet.</span><span>Undersized everything else.</span><svg viewBox="0 0 90 46" aria-hidden="true"><path d="M1 1h48l38 42" /><circle cx="87" cy="43" r="2" /></svg></div>
-              <div className="annotation piston-note"><svg viewBox="0 0 70 26" aria-hidden="true"><path d="M1 23 26 2h43" /><circle cx="1" cy="23" r="2" /></svg><span>Yes, that’s the whole thing.</span></div>
               <div className="measurement mono" aria-hidden="true"><span />2 mm<span /></div>
               <div className="inspection-stamp"><Icon name="warning" /><span>CAUTION<br /><strong>UNREASONABLE<br />CONFIDENCE</strong></span></div>
               <div className="artboard-bottom mono"><span><span className="status-dot" />EGO SYSTEMS ONLINE</span><span>FIG. 01</span></div>
@@ -222,6 +224,7 @@ export function App() {
         </div>
 
         <section className="story-section shell section-space" id="story" aria-labelledby="story-heading">
+          <TestNotice />
           <div className="story-visual grid-paper" aria-hidden="true">
             <div className="blueprint-caption mono">ENGINEERING A MINOR INCONVENIENCE</div>
             <svg className="usb-blueprint" viewBox="0 0 440 300" fill="none">
@@ -242,13 +245,14 @@ export function App() {
             <h2 id="story-heading">Built to move mountains.<br /><span className="muted-heading">Currently struggles<br className="desktop-break" /> with a USB port.</span></h2>
             <p>Somewhere in a very serious robotics lab, a very unserious engineering error was born. They gave him a mountain-moving mission. And approximately 2 mm to work with.</p>
             <p>He has not let that stop him. He has also not started.</p>
-            <p className="story-signoff">built different. dimensionally, not emotionally.</p>
+            <p className="story-signoff">The robot is fictional. The token was a platform test.</p>
           </div>
         </section>
 
         <section className="tech-section section-space" id="specs" aria-labelledby="specs-heading">
           <div className="shell">
-            <div className="section-heading-row"><div><h2 id="specs-heading">Precision engineered.<br /><span className="muted-heading">Wildly overestimated.</span></h2><p>The numbers are small. The claims are not.</p></div><span className="technical-tag mono"><Icon name="warning" />Entirely fictional specifications</span></div>
+            <TestNotice />
+            <div className="section-heading-row"><div><h2 id="specs-heading">Fictional robot specifications.</h2><p>A playful engineering sheet for a fictional robot.</p></div><span className="technical-tag mono"><Icon name="warning" />Entirely fictional specifications</span></div>
             <div className="tech-layout">
               <div className="spec-table" role="table" aria-label="Fictional engineering specifications">
                 <div className="spec-table-head" role="row"><span role="columnheader">Parameter</span><span role="columnheader">Factory specification</span></div>
@@ -266,13 +270,14 @@ export function App() {
                 <span className="simulation-note">A highly unscientific simulation.</span>
               </div>
             </div>
-            <p className="specs-bottom-note"><Icon name="warning" />he may be short, but his torque is astronomical.</p>
+            <p className="specs-bottom-note"><Icon name="warning" />Fictional robot specifications; test token only.</p>
           </div>
         </section>
 
         <section className="manifesto-section section-space" id="manifesto" aria-labelledby="manifesto-heading">
           <div className="shell manifesto-layout">
-            <div className="manifesto-title"><h2 id="manifesto-heading">The $DONGLE<br />manifesto.</h2><p>tiny shaft,<br />industrial-grade conviction.</p><div className="torque-seal" aria-hidden="true"><Icon name="bolt" /><span>100%<br />CONVICTION</span></div></div>
+            <TestNotice />
+            <div className="manifesto-title"><h2 id="manifesto-heading">The $DONGLE<br />manifesto.</h2><p>Fictional robot lore<br />from a platform test.</p><div className="torque-seal" aria-hidden="true"><Icon name="bolt" /><span>100%<br />CONVICTION</span></div></div>
             <ol className="manifesto-list">
               <li><span className="manifesto-number mono">01</span><div><h3>Size is a specification.<br />Confidence is a choice.</h3><p>The blueprint said “compact.” He read “unstoppable.” We support his interpretation.</p></div></li>
               <li><span className="manifesto-number mono">02</span><div><h3>Overengineer the dream.</h3><p>If a problem needs a mountain-sized solution, bring a 2 mm actuator and an unreasonable attitude.</p></div></li>
@@ -282,43 +287,47 @@ export function App() {
         </section>
 
         <section className="community-section shell section-space" id="community" aria-labelledby="community-heading">
-          <div className="section-heading-row"><div><h2 id="community-heading">Clock in.<br />Get unreasonably confident.</h2><p>The hardware is small. The group chat doesn’t have to be.</p></div><div className="community-doodle" aria-hidden="true"><RobotMark /><span>you’re hired.</span></div></div>
+          <TestNotice />
+          <div className="section-heading-row"><div><h2 id="community-heading">Share the test notice.</h2><p>Keep the test-token context with every share.</p></div><div className="community-doodle" aria-hidden="true"><RobotMark /><span>test token</span></div></div>
           <div className="community-links">
-            <a href={launch.xUrl ?? xShare} target="_blank" rel="noopener noreferrer"><Icon name="x" /><div><h3>{launch.xUrl ? 'Meet the crew on X' : 'Spread the word on X'}</h3><p>{launch.xUrl ? 'Dispatches from the factory floor.' : 'A very small robot. A very big post.'}</p></div><Icon name="arrowUp" /></a>
-            <a href={launch.telegramUrl ?? telegramShare} target="_blank" rel="noopener noreferrer"><Icon name="telegram" /><div><h3>{launch.telegramUrl ? 'Join the Telegram crew' : 'Send it to the group chat'}</h3><p>{launch.telegramUrl ? 'The factory break room is open.' : 'Telegram could use more torque.'}</p></div><Icon name="arrowUp" /></a>
-            <button type="button" onClick={() => openDialog('share')}><Icon name="download" /><div><h3>Take a little confidence</h3><p>Get the $DONGLE share card.</p></div><Icon name="arrowUp" /></button>
+            <a href={launch.xUrl ?? xShare} target="_blank" rel="noopener noreferrer"><Icon name="x" /><div><h3>{launch.xUrl ? 'Meet the crew on X' : 'Share the notice on X'}</h3><p>$DONGLE was just a test token.</p></div><Icon name="arrowUp" /></a>
+            <a href={launch.telegramUrl ?? telegramShare} target="_blank" rel="noopener noreferrer"><Icon name="telegram" /><div><h3>{launch.telegramUrl ? 'Join the Telegram crew' : 'Send the notice on Telegram'}</h3><p>Launched only for platform testing.</p></div><Icon name="arrowUp" /></a>
+            <button type="button" onClick={() => openDialog('share')}><Icon name="download" /><div><h3>Get the test-token card</h3><p>Download the notice with Dongle’s artwork.</p></div><Icon name="arrowUp" /></button>
           </div>
-          {!launch.xUrl && !launch.telegramUrl && <p className="community-note">These links share $DONGLE. Official community channels haven’t launched yet.</p>}
+          {!launch.xUrl && !launch.telegramUrl && <p className="community-note">X and Telegram open sharing tools for this notice.</p>}
         </section>
 
         <section className="contract-section shell" id="contract" aria-labelledby="contract-heading">
-          <div className="contract-inner"><div><div className="contract-title"><Icon name="warning" /><h3 id="contract-heading" tabIndex={-1}>Check the serial number.</h3></div><p>{launch.chain} token mint address</p></div><div className="contract-value">{launch.contractAddress ? <code>{launch.contractAddress}</code> : <span className="contract-placeholder">To be announced<span className="contract-placeholder-note">No token has been deployed.</span></span>}</div>{launch.contractAddress ? <button className="icon-button" type="button" aria-label="Copy token mint address" onClick={() => void copy(launch.contractAddress!, 'Mint address copied.', 'Clipboard unavailable. Select and copy the address above.')}><Icon name="copy" /></button> : <span className="contract-status"><span className="status-dot" />{launch.contractAddress ? 'Address supplied' : 'Pre-launch'}</span>}</div>
-          <p className="contract-note">{launch.contractAddress ? `Always verify the full mint address before buying. $DONGLE trades on ${launch.buyLabel}.` : 'This is an address placeholder. No token has been deployed yet.'}</p>
+          <TestNotice />
+          <div className="contract-inner"><div><div className="contract-title"><Icon name="warning" /><h2 id="contract-heading" tabIndex={-1}>Test-token mint address</h2></div><p>{launch.chain} token mint address</p></div><div className="contract-value"><code>{launch.contractAddress}</code></div><button className="icon-button" type="button" aria-label="Copy token mint address" onClick={() => void copy(launch.contractAddress, 'Mint address copied.', 'Clipboard unavailable. Select and copy the address above.')}><Icon name="copy" /></button></div>
+          <p className="contract-note">This is the existing test-token mint address, retained for reference. $DONGLE was launched only to test the platform.</p>
           <p className="contract-copy-status" role="status">{!dialog ? copyStatus : ''}</p>
         </section>
       </main>
 
       <footer className="site-footer shell">
-        <div className="footer-top"><a className="brand" href="#" aria-label="$DONGLE home"><RobotMark /><span>$DONGLE</span></a><p>Small parts. Big feelings about torque.</p><a className="back-to-top" href="#">Back to top <span aria-hidden="true">↑</span></a></div>
-        <div className="footer-bottom"><p>$DONGLE is a meme project for entertainment, and its robot and specifications are fictional. No promised utility, no guaranteed returns, and absolutely no mountains moved. Nothing here is financial advice.</p><span>© {new Date().getFullYear()} $DONGLE<br />All dimensions approximate.</span></div>
+        <TestNotice />
+        <div className="footer-top"><a className="brand" href="#" aria-label="$DONGLE home"><RobotMark /><span>$DONGLE</span></a><p>Launched only for platform testing.</p><a className="back-to-top" href="#">Back to top <span aria-hidden="true">↑</span></a></div>
+        <div className="footer-bottom"><p>$DONGLE was just a test token launched to test the platform. The robot and engineering specifications are fictional. No promised utility or guaranteed returns. Nothing here is financial advice.</p><span>© {new Date().getFullYear()} $DONGLE<br />All dimensions approximate.</span></div>
       </footer>
       <div className="hazard-stripe" aria-hidden="true" />
 
       <dialog ref={modal} className="factory-dialog" aria-labelledby="dialog-title" aria-describedby="dialog-description" onClose={handleClosed} onKeyDown={containDialogFocus} onClick={(event) => closeOnBackdrop(event, closeDialog)}>
         <div className="dialog-content"><button className="icon-button dialog-close" type="button" aria-label="Close dialog" onClick={closeDialog}><Icon name="close" /></button>
-          <div className="dialog-symbol"><Icon name={dialog === 'buy' ? 'warning' : 'bolt'} /></div>
-          <h2 id="dialog-title">{dialog === 'buy' ? launchReady ? 'Review the launch details.' : 'Still on the workbench.' : 'Export some confidence.'}</h2>
-          <p id="dialog-description">{dialog === 'buy' ? launchReady ? `Verify the full ${launch.chain} mint address below before trading on ${launch.buyLabel}. $DONGLE is a meme project with no promised utility.` : '$DONGLE is a fictional meme project. No token has launched and no purchase is available. The actuator is small. This part should be clear.' : 'Tiny robot. Big share energy. Download the card or send the factory to a friend.'}</p>
-          {dialog === 'buy' ? <><div className="dialog-status"><span className="status-dot" />{launch.chain} mint: {launch.contractAddress ? <code>{launch.contractAddress}</code> : 'to be announced'}</div>{launchReady ? <a className="button primary" href={launch.buyUrl!} target="_blank" rel="noopener noreferrer">Buy on {launch.buyLabel} <Icon name="arrowUp" /></a> : <button className="button primary" type="button" onClick={navigateToContract}>Check contract status <Icon name="arrow" /></button>}<button type="button" className="dialog-text-button" onClick={closeDialog}>Back to the factory</button></> : <><img className="share-preview" src="./images/dongle-share.png" alt="$DONGLE share card with the helmeted orange robot and Small shaft. Massive torque. slogan." width="1200" height="630" /><a className="button primary" href="./images/dongle-share.png" download="dongle-small-shaft-massive-torque.png">Download share card <Icon name="download" /></a><button className="button secondary" type="button" onClick={() => void copy(shareUrl.href, 'Factory link copied. Send in the crew.')}><Icon name="copy" />Copy page link</button><p className="dialog-copy-status" role="status">{copyStatus}</p>{copyStatus.startsWith('Clipboard unavailable') && <input className="copy-fallback" aria-label="Page link to copy" readOnly value={shareUrl.href} onFocus={(event) => event.currentTarget.select()} />}</>}
+          <div className="dialog-symbol"><Icon name={dialog === 'notice' ? 'warning' : 'bolt'} /></div>
+          <h2 id="dialog-title">{dialog === 'notice' ? 'Just a test token.' : 'Share the test-token notice.'}</h2>
+          <p id="dialog-description" className="dialog-test-description">$DONGLE was launched only to test the platform.</p>
+          {dialog === 'notice' ? <><div className="dialog-status"><span className="status-dot" />Existing {launch.chain} test-token mint: <code>{launch.contractAddress}</code></div><button className="button primary" type="button" onClick={navigateToContract}>View test-token address <Icon name="arrow" /></button><button type="button" className="dialog-text-button" onClick={closeDialog}>Back to the site</button></> : <><img className="share-preview" src="./images/dongle-share.png" alt="$DONGLE test-token notice: just a test token, launched only to test the platform, beside the helmeted orange robot." width="1200" height="630" /><a className="button primary" href="./images/dongle-share.png" download="dongle-test-token-notice.png">Download share card <Icon name="download" /></a><button className="button secondary" type="button" onClick={() => void copy(shareUrl.href, 'Notice link copied.')}><Icon name="copy" />Copy page link</button><p className="dialog-copy-status" role="status">{copyStatus}</p>{copyStatus.startsWith('Clipboard unavailable') && <input className="copy-fallback" aria-label="Page link to copy" readOnly value={shareUrl.href} onFocus={(event) => event.currentTarget.select()} />}</>}
         </div>
       </dialog>
 
       <dialog ref={film} className="factory-dialog film-dialog" aria-labelledby="film-title" aria-describedby="film-description" onClose={handleFilmClosed} onKeyDown={containDialogFocus} onClick={(event) => closeOnBackdrop(event, closeFilm)}>
         <div className="film-content">
-          <div className="film-head"><h2 id="film-title">Field test DNG-001</h2><button className="icon-button" type="button" aria-label="Close film" onClick={closeFilm}><Icon name="close" /></button></div>
+          <div className="film-head"><h2 id="film-title">JUST A TEST TOKEN</h2><button className="icon-button" type="button" aria-label="Close film" onClick={closeFilm}><Icon name="close" /></button></div>
+          <p className="film-test-notice">$DONGLE was launched only to test the platform.</p>
           <video ref={filmVideo} className="film-video" poster="./media/dongle-film-poster.webp" width="720" height="720" muted playsInline controls preload="metadata" aria-describedby="film-description"><source src="./media/dongle-film.webm" type="video/webm" /><source src="./media/dongle-film.mp4" type="video/mp4" /></video>
           <p id="film-description" className="film-description">Silent, 11 seconds. Dongle lands, measures his 2 mm actuator, then tops out at 9,000 RPM of confidence.</p>
-          <div className="film-actions"><button className="button primary" type="button" onClick={buyFromFilm}>BUY $DONGLE <Icon name="arrowUp" /></button><button className="button secondary" type="button" onClick={closeFilm}>Skip to the site</button></div>
+          <div className="film-actions"><button className="button primary" type="button" onClick={noticeFromFilm}>Read the notice <Icon name="arrow" /></button><button className="button secondary" type="button" onClick={closeFilm}>Skip to the site</button></div>
         </div>
       </dialog>
     </>

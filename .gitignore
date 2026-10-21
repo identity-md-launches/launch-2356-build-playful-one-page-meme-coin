@@ -5,3 +5,10 @@
 # Explicit ignore path budget: disposable validation work under this single path, 0 submitted bytes.
 /test/scratch/
 # dist/ is a required deliverable and is deliberately included.
+# Explicit inclusion path budget: review documents/JSON and selected WebP screenshots
+# under /artifacts/, at most 1,048,576 submitted bytes in total. No dependencies or caches.
+!/artifacts/
+!/artifacts/*.md
+!/artifacts/*.json
+!/artifacts/screenshots/
+!/artifacts/screenshots/*.webp

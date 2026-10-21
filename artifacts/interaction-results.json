@@ -1,0 +1,223 @@
+{
+  "checks": [
+    {
+      "name": "Intro film greets a new session paused under reduced motion and closes from the backdrop",
+      "passed": true,
+      "detail": "Opens once per session, no autoplay under reduced motion, backdrop click dismisses, reload stays dismissed."
+    },
+    {
+      "name": "Static subpath and reflow at 320px",
+      "passed": true,
+      "detail": {
+        "viewport": 320,
+        "content": 320
+      }
+    },
+    {
+      "name": "Static subpath and reflow at 390px",
+      "passed": true,
+      "detail": {
+        "viewport": 390,
+        "content": 390
+      }
+    },
+    {
+      "name": "Static subpath and reflow at 700px",
+      "passed": true,
+      "detail": {
+        "viewport": 700,
+        "content": 700
+      }
+    },
+    {
+      "name": "Static subpath and reflow at 701px",
+      "passed": true,
+      "detail": {
+        "viewport": 701,
+        "content": 701
+      }
+    },
+    {
+      "name": "Static subpath and reflow at 768px",
+      "passed": true,
+      "detail": {
+        "viewport": 768,
+        "content": 768
+      }
+    },
+    {
+      "name": "Static subpath and reflow at 960px",
+      "passed": true,
+      "detail": {
+        "viewport": 960,
+        "content": 960
+      }
+    },
+    {
+      "name": "Static subpath and reflow at 1024px",
+      "passed": true,
+      "detail": {
+        "viewport": 1024,
+        "content": 1024
+      }
+    },
+    {
+      "name": "Static subpath and reflow at 1280px",
+      "passed": true,
+      "detail": {
+        "viewport": 1280,
+        "content": 1280
+      }
+    },
+    {
+      "name": "Static subpath and reflow at 1440px",
+      "passed": true,
+      "detail": {
+        "viewport": 1440,
+        "content": 1440
+      }
+    },
+    {
+      "name": "390px first screen includes product and primary action",
+      "passed": true,
+      "detail": {
+        "notice": {
+          "x": 20,
+          "y": 368.859375,
+          "width": 350,
+          "height": 56
+        },
+        "mascot": {
+          "x": 63.328125,
+          "y": 485.859375,
+          "width": 263.34375,
+          "height": 276
+        }
+      }
+    },
+    {
+      "name": "Bold test-token disclosure covers every section and no launch-platform link remains",
+      "passed": true,
+      "detail": "Hero, five content sections, footer, allowed link destinations, metadata and 28px/700 section notices verified."
+    },
+    {
+      "name": "Mobile navigation opens, follows anchors and closes",
+      "passed": true,
+      "detail": "Anchor navigation, expanded state, Escape and focus return passed."
+    },
+    {
+      "name": "Test-token notice shows the existing mint, traps focus and Escape restores trigger",
+      "passed": true,
+      "detail": "Existing mint unchanged; no outbound link in notice; Tab loop, Escape, close button and focus return passed."
+    },
+    {
+      "name": "Technical specs anchor and simulation pending, success and repeat states",
+      "passed": true,
+      "detail": "1 second simulation; button prevents duplicate runs and announces the result."
+    },
+    {
+      "name": "Share links carry page URL and use real platform share endpoints",
+      "passed": true,
+      "detail": "Destinations, test-token copy and encoded current URL verified; no fabricated social handles."
+    },
+    {
+      "name": "Share card download, clipboard success and fallback",
+      "passed": true,
+      "detail": "1200 × 630 local PNG downloads; real clipboard readback and denied-permission recovery passed."
+    },
+    {
+      "name": "Mint address copy button copies the full address",
+      "passed": true,
+      "detail": "Clipboard readback equals the verified mint."
+    },
+    {
+      "name": "Automated accessibility scan at 390px",
+      "passed": true,
+      "detail": "27 rules passed; no automated WCAG A/AA violations."
+    },
+    {
+      "name": "Automated accessibility scan at 1440px",
+      "passed": true,
+      "detail": "27 rules passed; no automated WCAG A/AA violations."
+    },
+    {
+      "name": "Reduced motion stops graphical animation",
+      "passed": true,
+      "detail": "Simulation still provides text feedback with zero running animations."
+    },
+    {
+      "name": "Primary hover contrast and inverse-panel keyboard focus",
+      "passed": true,
+      "detail": {
+        "hoverContrast": 4.66,
+        "focus": {
+          "visible": true,
+          "color": "rgb(245, 243, 235)",
+          "width": "3px"
+        }
+      }
+    },
+    {
+      "name": "200% text enlargement reflows at 390px",
+      "passed": true,
+      "detail": "Text enlargement checked separately from browser-native zoom."
+    },
+    {
+      "name": "Production export has no page or resource errors",
+      "passed": true,
+      "detail": "All scripts, styles, fonts, mascot, share image and favicon loaded locally."
+    },
+    {
+      "name": "Intro film autoplays muted at 390px with the notice action on screen",
+      "passed": true,
+      "detail": {
+        "video": {
+          "x": 31,
+          "y": 243.609375,
+          "width": 328,
+          "height": 328
+        },
+        "notice": {
+          "x": 31,
+          "y": 641.609375,
+          "width": 160,
+          "height": 74.78125
+        },
+        "skip": {
+          "x": 199,
+          "y": 641.609375,
+          "width": 160,
+          "height": 74.78125
+        }
+      }
+    },
+    {
+      "name": "Play the film reopens it, Skip returns focus, Read hands off to the notice dialog",
+      "passed": true,
+      "detail": "Replay, skip, close button and notice hand-off passed with focus restored."
+    }
+  ],
+  "limits": [
+    "WebKit could not launch: browser executable unavailable."
+  ],
+  "pageErrors": [],
+  "resourceErrors": [],
+  "accessibility": [
+    {
+      "state": "film dialog",
+      "violations": []
+    },
+    {
+      "state": "notice dialog",
+      "violations": []
+    },
+    {
+      "state": "390px page",
+      "violations": []
+    },
+    {
+      "state": "1440px page",
+      "violations": []
+    }
+  ]
+}

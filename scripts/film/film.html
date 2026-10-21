@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>$DONGLE field test film</title>
+<style>
+  @font-face { font-family: 'Barlow Condensed'; font-weight: 700; src: url('/node_modules/@fontsource/barlow-condensed/files/barlow-condensed-latin-700-normal.woff2') format('woff2'); }
+  @font-face { font-family: 'Barlow'; font-weight: 600; src: url('/node_modules/@fontsource/barlow/files/barlow-latin-600-normal.woff2') format('woff2'); }
+  @font-face { font-family: 'IBM Plex Mono'; font-weight: 400; src: url('/node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2') format('woff2'); }
+  :root { --bg: #f5f3eb; --ink: #25251f; --muted: #68685e; --accent: #e95b14; --safety: #f6d345; }
+  * { box-sizing: border-box; margin: 0; }
+  html, body { width: 720px; height: 720px; overflow: hidden; background: var(--bg); }
+  #stage { position: relative; width: 720px; height: 720px; overflow: hidden; color: var(--ink); font-family: 'Barlow', sans-serif;
+    background-image: linear-gradient(to right, #25251f10 1px, transparent 1px), linear-gradient(to bottom, #25251f10 1px, transparent 1px); background-size: 36px 36px; background-position: center; }
+  .mono { font-family: 'IBM Plex Mono', monospace; font-size: 16px; color: var(--muted); }
+  .label { position: absolute; z-index: 5; }
+  .corner { position: absolute; width: 18px; height: 18px; border: solid var(--muted); z-index: 5; }
+  #camera { position: absolute; inset: 0; transform-origin: 0 0; }
+  #robot { position: absolute; width: 420px; left: 150px; top: 150px; filter: drop-shadow(4px 16px 10px #25251f22); }
+  #shadow { position: absolute; left: 230px; top: 578px; width: 260px; height: 26px; border-radius: 50%; background: #25251f26; }
+  #orbit { position: absolute; left: 120px; top: 118px; width: 480px; height: 480px; border: 1.5px dashed #9d9c8e; border-radius: 50%; }
+  #bracket { position: absolute; left: 173px; top: 218px; display: flex; flex-direction: column-reverse; align-items: center; gap: 4px; }
+  #bracket .ticks { width: 54px; height: 10px; border: 1.5px solid var(--ink); border-bottom: 0; }
+  #bracket span { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--ink); }
+  .caption { position: absolute; left: 40px; bottom: 64px; z-index: 6; background: var(--ink); color: var(--bg); padding: 12px 18px; border-radius: 4px; font-weight: 600; font-size: 30px; line-height: 1.1; }
+  .caption small { display: block; font-family: 'IBM Plex Mono', monospace; font-weight: 400; font-size: 15px; color: #b7b7a6; margin-bottom: 6px; }
+  #gauge { position: absolute; right: 40px; top: 96px; width: 190px; height: 120px; z-index: 6; }
+  #gauge-value { position: absolute; right: 40px; top: 222px; width: 190px; text-align: center; font-family: 'IBM Plex Mono', monospace; font-size: 18px; z-index: 6; }
+  #hazard { position: absolute; left: 0; right: 0; bottom: 0; height: 26px; background: repeating-linear-gradient(-50deg, var(--ink) 0 16px, var(--safety) 16px 32px); z-index: 7; }
+  #title { position: absolute; left: 40px; top: 84px; z-index: 6; font-family: 'Barlow Condensed', sans-serif; font-weight: 700; font-size: 104px; line-height: .86; letter-spacing: -.02em; }
+  #title span { display: block; }
+  #title .accent { color: var(--accent); }
+  #mint { position: absolute; left: 40px; right: 40px; bottom: 64px; z-index: 6; border-top: 2px solid var(--ink); padding-top: 14px; }
+  #mint strong { display: block; font-family: 'Barlow Condensed', sans-serif; font-size: 40px; line-height: 1; }
+  #mint code { display: block; margin-top: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 18px; color: var(--ink); }
+  #stamp { position: absolute; right: 36px; top: 360px; z-index: 6; background: var(--safety); border: 2px solid var(--ink); padding: 10px 14px; font-weight: 600; font-size: 20px; line-height: 1.15; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <span class="corner" style="left:14px;top:14px;border-width:2px 0 0 2px"></span>
+  <span class="corner" style="right:14px;top:14px;border-width:2px 2px 0 0"></span>
+  <span class="corner" style="left:14px;bottom:40px;border-width:0 0 2px 2px"></span>
+  <span class="corner" style="right:14px;bottom:40px;border-width:0 2px 2px 0"></span>
+  <span class="label mono" style="left:40px;top:28px">DNG-001 / FIELD TEST</span>
+  <span class="label mono" id="timecode" style="right:40px;top:28px">00:00</span>
+  <div id="camera">
+    <div id="orbit"></div>
+    <div id="shadow"></div>
+    <img id="robot" src="/src/assets/dongle.webp" alt="" />
+    <div id="bracket"><div class="ticks"></div><span>2 mm</span></div>
+  </div>
+  <div class="caption" id="cap-travel"><small>TEST 01</small>Actuator travel: 2 mm</div>
+  <div class="caption" id="cap-torque"><small>TEST 02</small>Confidence: 9,000 RPM</div>
+  <svg id="gauge" viewBox="0 0 190 120" fill="none">
+    <path d="M15 110a80 80 0 0 1 160 0" stroke="#25251f" stroke-width="3" />
+    <path d="M135 41a80 80 0 0 1 40 69" stroke="#e95b14" stroke-width="9" />
+    <g stroke="#25251f" stroke-width="2"><path d="M25 110h10M155 110h10M95 30v10M38 53l7 7M152 53l-7 7" /></g>
+    <line id="needle" x1="95" y1="110" x2="95" y2="42" stroke="#25251f" stroke-width="4" stroke-linecap="round" />
+    <circle cx="95" cy="110" r="7" fill="#25251f" />
+  </svg>
+  <div id="gauge-value">0 RPM</div>
+  <div id="stamp">CAUTION<br />UNREASONABLE<br />CONFIDENCE</div>
+  <div id="title"><span>SMALL SHAFT.</span><span class="accent">MASSIVE</span><span class="accent">TORQUE.</span></div>
+  <div id="mint"><strong>$DONGLE on Solana</strong><code>7i5fZty1GFryS5ZWqUFRPstfiQDhvNmoFjwaTqb5w1q7</code></div>
+  <div id="hazard"></div>
+</div>
+<script>
+  // Every frame is a pure function of time, so the renderer can seek frame by frame.
+  const $ = (id) => document.getElementById(id);
+  const clamp = (v) => Math.min(1, Math.max(0, v));
+  const span = (t, a, b) => clamp((t - a) / (b - a));
+  const ease = (x) => 1 - Math.pow(1 - x, 3);
+  const inOut = (x) => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+  const bounce = (x) => { const n = 7.5625, d = 2.75; if (x < 1 / d) return n * x * x; if (x < 2 / d) return n * (x -= 1.5 / d) * x + .75; if (x < 2.5 / d) return n * (x -= 2.25 / d) * x + .9375; return n * (x -= 2.625 / d) * x + .984375; };
+  const fade = (el, t, a, b, out, outEnd) => { el.style.opacity = out === undefined ? span(t, a, b) : Math.min(span(t, a, b), 1 - span(t, out, outEnd)); };
+  const lerp = (a, b, x) => a + (b - a) * x;
+  window.DURATION = 11;
+  window.render = (t) => {
+    $('timecode').textContent = `00:${String(Math.floor(t)).padStart(2, '0')}`;
+    // Scene A: drop in.
+    const drop = bounce(span(t, .2, 1.6));
+    $('robot').style.translate = `0 ${lerp(-620, 0, drop)}px`;
+    $('shadow').style.scale = `${lerp(.3, 1, drop)} 1`;
+    $('shadow').style.opacity = lerp(.2, 1, drop);
+    fade($('orbit'), t, 1.2, 2, 7, 7.6);
+    // Scene B: zoom on the actuator (held in the raised hand, about 12% across and 31% down the art).
+    const zin = inOut(span(t, 2.2, 3.1)), zout = inOut(span(t, 4.4, 5.1));
+    const zoom = lerp(1, 2.3, zin * (1 - zout));
+    const fx = 150 + 420 * .12, fy = 150 + 440 * .3;
+    // Scene D: the robot steps right to make room for the headline.
+    const shift = inOut(span(t, 7.1, 7.9));
+    let jitterX = 0, jitterY = 0;
+    if (t > 5.1 && t < 7.1) { const k = Math.sin(t * 90) * 3.5 * (1 - span(t, 6.6, 7.1)); jitterX = k; jitterY = Math.cos(t * 70) * 2; }
+    const focus = zin * (1 - zout);
+    const camX = (360 - fx * zoom) * focus, camY = (330 - fy * zoom) * focus;
+    $('camera').style.transform = `translate(${camX + jitterX + shift * 348}px, ${camY + jitterY + shift * 206}px) scale(${zoom * lerp(1, .6, shift)})`;
+    fade($('bracket'), t, 2.9, 3.2, 4.4, 4.7);
+    fade($('cap-travel'), t, 2.9, 3.2, 4.4, 4.7);
+    // Scene C: torque test.
+    const sweep = ease(span(t, 5.2, 6.6));
+    $('needle').setAttribute('transform', `rotate(${lerp(-80, 62, sweep)} 95 110)`);
+    $('gauge-value').textContent = `${Math.round(sweep * 9000).toLocaleString('en-US')} RPM`;
+    fade($('gauge'), t, 4.9, 5.2, 7, 7.3);
+    fade($('gauge-value'), t, 4.9, 5.2, 7, 7.3);
+    fade($('cap-torque'), t, 5, 5.3, 7, 7.3);
+    const stampIn = ease(span(t, 6.4, 6.7));
+    $('stamp').style.opacity = Math.min(stampIn, 1 - span(t, 7, 7.3));
+    $('stamp').style.transform = `rotate(8deg) scale(${lerp(1.6, 1, stampIn)})`;
+    $('hazard').style.translate = `${lerp(-720, 0, ease(span(t, 5, 5.6)))}px 0`;
+    // Scene D: the title card.
+    const titleIn = ease(span(t, 7.5, 8.2));
+    $('title').style.opacity = titleIn;
+    $('title').style.translate = `${lerp(-30, 0, titleIn)}px 0`;
+    fade($('mint'), t, 8.4, 8.9);
+  };
+  window.render(0);
+</script>
+</body>
+</html>

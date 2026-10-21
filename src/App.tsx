@@ -1,7 +1,9 @@
-import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
+import { useEffect, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent } from 'react';
 import { Icon, RobotMark } from './icons';
 import { launch } from './config';
 import robot from './assets/dongle.webp';
+
+const filmSeenKey = 'dongle-film-seen';
 
 const specs = [
   ['Actuator travel', '2 mm', 'Every millimeter counts.'],
@@ -23,6 +25,11 @@ export function App() {
   const modal = useRef<HTMLDialogElement>(null);
   const lastTrigger = useRef<HTMLElement | null>(null);
   const testTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const film = useRef<HTMLDialogElement>(null);
+  const filmVideo = useRef<HTMLVideoElement>(null);
+  const filmTrigger = useRef<HTMLElement | null>(null);
+  const filmNext = useRef<'buy' | null>(null);
+  const heroBuy = useRef<HTMLButtonElement>(null);
 
   const shareText = 'Small shaft. Massive torque. Meet $DONGLE: micro hardware. macro ego.';
   const launchReady = Boolean(launch.buyUrl && launch.contractAddress);
@@ -42,6 +49,13 @@ export function App() {
   }, [dialog]);
 
   useEffect(() => () => { if (testTimer.current) clearTimeout(testTimer.current); }, []);
+
+  // The field-test film greets each new session. Reduced motion opens it paused on its poster.
+  useEffect(() => {
+    let seen = false;
+    try { seen = sessionStorage.getItem(filmSeenKey) === '1'; } catch { /* storage blocked: show the film */ }
+    if (!seen) openFilm(null);
+  }, []);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -64,6 +78,47 @@ export function App() {
 
   function closeDialog() {
     modal.current?.close();
+  }
+
+  function openFilm(trigger: HTMLElement | null) {
+    const dialogEl = film.current;
+    const video = filmVideo.current;
+    if (!dialogEl || !video || dialogEl.open) return;
+    filmTrigger.current = trigger;
+    filmNext.current = null;
+    dialogEl.showModal();
+    document.body.style.overflow = 'hidden';
+    video.currentTime = 0;
+    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) void video.play().catch(() => {});
+  }
+
+  function closeFilm() {
+    film.current?.close();
+  }
+
+  function handleFilmClosed() {
+    filmVideo.current?.pause();
+    document.body.style.overflow = '';
+    try { sessionStorage.setItem(filmSeenKey, '1'); } catch { /* storage blocked */ }
+    if (filmNext.current === 'buy') {
+      filmNext.current = null;
+      lastTrigger.current = heroBuy.current;
+      setCopyStatus('');
+      setDialog('buy');
+    } else {
+      filmTrigger.current?.focus();
+    }
+  }
+
+  function buyFromFilm() {
+    filmNext.current = 'buy';
+    closeFilm();
+  }
+
+  function closeOnBackdrop(event: ReactMouseEvent<HTMLDialogElement>, close: () => void) {
+    if (event.target !== event.currentTarget) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) close();
   }
 
   function handleClosed() {
@@ -137,7 +192,7 @@ export function App() {
             <h1 id="hero-title"><span>SMALL SHAFT.</span><span className="accent">MASSIVE</span><span className="accent">TORQUE.</span></h1>
             <p className="hero-description">The world’s smallest autonomous<br className="desktop-break" /> robotic actuator.</p>
             <div className="hero-actions">
-              <button className="button primary" type="button" onClick={() => openDialog('buy')}>BUY $DONGLE <Icon name="arrowUp" /></button>
+              <button ref={heroBuy} className="button primary" type="button" onClick={() => openDialog('buy')}>BUY $DONGLE <Icon name="arrowUp" /></button>
               <a className="spec-link" href="#specs">READ THE TECHNICAL SPECS <Icon name="arrow" /></a>
             </div>
             <p className="hero-footnote"><span className="status-dot" />Tiny hardware. Excessive self-belief.</p>
@@ -147,6 +202,7 @@ export function App() {
             <div className="artboard grid-paper">
               <div className="artboard-top"><span className="mono">DNG–001 / FRONT VIEW</span><span className="mono">SCALE 100:1</span></div>
               <span className="art-corner top-left" /><span className="art-corner top-right" /><span className="art-corner bottom-left" /><span className="art-corner bottom-right" />
+              <button className="film-trigger" type="button" onClick={(event) => openFilm(event.currentTarget)}><Icon name="play" /><span className="film-trigger-label">Play the film</span></button>
               <div className="orbit" aria-hidden="true" />
               <img className="hero-robot" src={robot} width="1000" height="1048" alt="Dongle: a tiny orange factory robot with angry, determined eyes, a huge yellow hard hat, and a comically small silver actuator." fetchPriority="high" />
               <div className="annotation helmet-note"><span>Oversized helmet.</span><span>Undersized everything else.</span><svg viewBox="0 0 90 46" aria-hidden="true"><path d="M1 1h48l38 42" /><circle cx="87" cy="43" r="2" /></svg></div>
@@ -236,24 +292,33 @@ export function App() {
         </section>
 
         <section className="contract-section shell" id="contract" aria-labelledby="contract-heading">
-          <div className="contract-inner"><div><div className="contract-title"><Icon name="warning" /><h3 id="contract-heading" tabIndex={-1}>Check the serial number.</h3></div><p>Token contract address</p></div><div className="contract-value">{launch.contractAddress ? <code>{launch.contractAddress}</code> : <span className="contract-placeholder">To be announced<span className="contract-placeholder-note">No token has been deployed.</span></span>}</div>{launch.contractAddress ? <button className="icon-button" type="button" aria-label="Copy token contract address" onClick={() => void copy(launch.contractAddress!, 'Contract address copied.', 'Clipboard unavailable. Select and copy the address above.')}><Icon name="copy" /></button> : <span className="contract-status"><span className="status-dot" />{launch.contractAddress ? 'Address supplied' : 'Pre-launch'}</span>}</div>
-          <p className="contract-note">{launch.contractAddress ? 'Always verify the full contract address before buying.' : 'This is an address placeholder. $DONGLE is fictional and isn’t available to buy.'}</p>
+          <div className="contract-inner"><div><div className="contract-title"><Icon name="warning" /><h3 id="contract-heading" tabIndex={-1}>Check the serial number.</h3></div><p>{launch.chain} token mint address</p></div><div className="contract-value">{launch.contractAddress ? <code>{launch.contractAddress}</code> : <span className="contract-placeholder">To be announced<span className="contract-placeholder-note">No token has been deployed.</span></span>}</div>{launch.contractAddress ? <button className="icon-button" type="button" aria-label="Copy token mint address" onClick={() => void copy(launch.contractAddress!, 'Mint address copied.', 'Clipboard unavailable. Select and copy the address above.')}><Icon name="copy" /></button> : <span className="contract-status"><span className="status-dot" />{launch.contractAddress ? 'Address supplied' : 'Pre-launch'}</span>}</div>
+          <p className="contract-note">{launch.contractAddress ? `Always verify the full mint address before buying. $DONGLE trades on ${launch.buyLabel}.` : 'This is an address placeholder. No token has been deployed yet.'}</p>
           <p className="contract-copy-status" role="status">{!dialog ? copyStatus : ''}</p>
         </section>
       </main>
 
       <footer className="site-footer shell">
         <div className="footer-top"><a className="brand" href="#" aria-label="$DONGLE home"><RobotMark /><span>$DONGLE</span></a><p>Small parts. Big feelings about torque.</p><a className="back-to-top" href="#">Back to top <span aria-hidden="true">↑</span></a></div>
-        <div className="footer-bottom"><p>$DONGLE is a fictional meme project for entertainment. No promised utility, no guaranteed returns, and absolutely no mountains moved. Nothing here is financial advice.</p><span>© {new Date().getFullYear()} $DONGLE<br />All dimensions approximate.</span></div>
+        <div className="footer-bottom"><p>$DONGLE is a meme project for entertainment, and its robot and specifications are fictional. No promised utility, no guaranteed returns, and absolutely no mountains moved. Nothing here is financial advice.</p><span>© {new Date().getFullYear()} $DONGLE<br />All dimensions approximate.</span></div>
       </footer>
       <div className="hazard-stripe" aria-hidden="true" />
 
-      <dialog ref={modal} className="factory-dialog" aria-labelledby="dialog-title" aria-describedby="dialog-description" onClose={handleClosed} onKeyDown={containDialogFocus} onClick={(event) => { if (event.target === event.currentTarget) { const rect = event.currentTarget.getBoundingClientRect(); if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) closeDialog(); } }}>
+      <dialog ref={modal} className="factory-dialog" aria-labelledby="dialog-title" aria-describedby="dialog-description" onClose={handleClosed} onKeyDown={containDialogFocus} onClick={(event) => closeOnBackdrop(event, closeDialog)}>
         <div className="dialog-content"><button className="icon-button dialog-close" type="button" aria-label="Close dialog" onClick={closeDialog}><Icon name="close" /></button>
           <div className="dialog-symbol"><Icon name={dialog === 'buy' ? 'warning' : 'bolt'} /></div>
           <h2 id="dialog-title">{dialog === 'buy' ? launchReady ? 'Review the launch details.' : 'Still on the workbench.' : 'Export some confidence.'}</h2>
-          <p id="dialog-description">{dialog === 'buy' ? launchReady ? 'Verify the full contract address below before opening the official buy link. $DONGLE is a meme project with no promised utility.' : '$DONGLE is a fictional meme project. No token has launched and no purchase is available. The actuator is small. This part should be clear.' : 'Tiny robot. Big share energy. Download the card or send the factory to a friend.'}</p>
-          {dialog === 'buy' ? <><div className="dialog-status"><span className="status-dot" />Contract address: {launch.contractAddress ? <code>{launch.contractAddress}</code> : 'to be announced'}</div>{launchReady ? <a className="button primary" href={launch.buyUrl!} target="_blank" rel="noopener noreferrer">Open official buy link <Icon name="arrowUp" /></a> : <button className="button primary" type="button" onClick={navigateToContract}>Check contract status <Icon name="arrow" /></button>}<button type="button" className="dialog-text-button" onClick={closeDialog}>Back to the factory</button></> : <><img className="share-preview" src="./images/dongle-share.png" alt="$DONGLE share card with the helmeted orange robot and Small shaft. Massive torque. slogan." width="1200" height="630" /><a className="button primary" href="./images/dongle-share.png" download="dongle-small-shaft-massive-torque.png">Download share card <Icon name="download" /></a><button className="button secondary" type="button" onClick={() => void copy(shareUrl.href, 'Factory link copied. Send in the crew.')}><Icon name="copy" />Copy page link</button><p className="dialog-copy-status" role="status">{copyStatus}</p>{copyStatus.startsWith('Clipboard unavailable') && <input className="copy-fallback" aria-label="Page link to copy" readOnly value={shareUrl.href} onFocus={(event) => event.currentTarget.select()} />}</>}
+          <p id="dialog-description">{dialog === 'buy' ? launchReady ? `Verify the full ${launch.chain} mint address below before trading on ${launch.buyLabel}. $DONGLE is a meme project with no promised utility.` : '$DONGLE is a fictional meme project. No token has launched and no purchase is available. The actuator is small. This part should be clear.' : 'Tiny robot. Big share energy. Download the card or send the factory to a friend.'}</p>
+          {dialog === 'buy' ? <><div className="dialog-status"><span className="status-dot" />{launch.chain} mint: {launch.contractAddress ? <code>{launch.contractAddress}</code> : 'to be announced'}</div>{launchReady ? <a className="button primary" href={launch.buyUrl!} target="_blank" rel="noopener noreferrer">Buy on {launch.buyLabel} <Icon name="arrowUp" /></a> : <button className="button primary" type="button" onClick={navigateToContract}>Check contract status <Icon name="arrow" /></button>}<button type="button" className="dialog-text-button" onClick={closeDialog}>Back to the factory</button></> : <><img className="share-preview" src="./images/dongle-share.png" alt="$DONGLE share card with the helmeted orange robot and Small shaft. Massive torque. slogan." width="1200" height="630" /><a className="button primary" href="./images/dongle-share.png" download="dongle-small-shaft-massive-torque.png">Download share card <Icon name="download" /></a><button className="button secondary" type="button" onClick={() => void copy(shareUrl.href, 'Factory link copied. Send in the crew.')}><Icon name="copy" />Copy page link</button><p className="dialog-copy-status" role="status">{copyStatus}</p>{copyStatus.startsWith('Clipboard unavailable') && <input className="copy-fallback" aria-label="Page link to copy" readOnly value={shareUrl.href} onFocus={(event) => event.currentTarget.select()} />}</>}
+        </div>
+      </dialog>
+
+      <dialog ref={film} className="factory-dialog film-dialog" aria-labelledby="film-title" aria-describedby="film-description" onClose={handleFilmClosed} onKeyDown={containDialogFocus} onClick={(event) => closeOnBackdrop(event, closeFilm)}>
+        <div className="film-content">
+          <div className="film-head"><h2 id="film-title">Field test DNG-001</h2><button className="icon-button" type="button" aria-label="Close film" onClick={closeFilm}><Icon name="close" /></button></div>
+          <video ref={filmVideo} className="film-video" poster="./media/dongle-film-poster.webp" width="720" height="720" muted playsInline controls preload="metadata" aria-describedby="film-description"><source src="./media/dongle-film.webm" type="video/webm" /><source src="./media/dongle-film.mp4" type="video/mp4" /></video>
+          <p id="film-description" className="film-description">Silent, 11 seconds. Dongle lands, measures his 2 mm actuator, then tops out at 9,000 RPM of confidence.</p>
+          <div className="film-actions"><button className="button primary" type="button" onClick={buyFromFilm}>BUY $DONGLE <Icon name="arrowUp" /></button><button className="button secondary" type="button" onClick={closeFilm}>Skip to the site</button></div>
         </div>
       </dialog>
     </>

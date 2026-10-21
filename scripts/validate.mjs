@@ -3,13 +3,14 @@ import { createServer } from 'node:http';
 import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { extname, resolve, sep } from 'node:path';
 import { chromium, webkit } from 'playwright';
+const buyUrl = 'https://chore-ui-fix-launchpad.machinefun.workers.dev/project/Bke57gF8Mct';
 import AxeBuilder from '@axe-core/playwright';
 
 // Checks the real production export at a static-hosting subpath. No development server.
 const output = resolve('test/scratch/validation');
 await mkdir(output, { recursive: true });
 const root = resolve('dist');
-const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.webp': 'image/webp', '.woff2': 'font/woff2', '.woff': 'font/woff' };
+const mime = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.webp': 'image/webp', '.woff2': 'font/woff2', '.woff': 'font/woff', '.mp4': 'video/mp4', '.webm': 'video/webm' };
 const server = createServer(async (req, res) => {
   try {
     const pathname = decodeURIComponent(new URL(req.url, 'http://localhost').pathname);
@@ -40,7 +41,8 @@ async function check(name, task) {
 }
 
 try {
-  browser = await chromium.launch({ headless: true });
+  // CHROMIUM_PATH may point at an installed Chromium when Playwright's own download is unavailable.
+  browser = await chromium.launch({ headless: true, executablePath: process.env.CHROMIUM_PATH || undefined });
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: 'reduce', acceptDownloads: true });
   const page = await context.newPage();
   page.setDefaultTimeout(8000);
@@ -48,6 +50,25 @@ try {
   page.on('response', (response) => { if (response.status() >= 400) results.resourceErrors.push(`${response.status()} ${new URL(response.url()).pathname}`); });
   await page.goto(url);
   await page.evaluate(() => document.fonts.ready);
+
+  await check('Intro film greets a new session paused under reduced motion and closes from the backdrop', async () => {
+    const film = page.getByRole('dialog', { name: 'Field test DNG-001' });
+    await film.waitFor({ state: 'visible' });
+    const video = film.locator('video');
+    assert.equal(await video.evaluate((el) => el.paused), true);
+    assert.match(await video.evaluate((el) => el.currentSrc), /dongle-film\.webm$/);
+    await page.screenshot({ path: `${output}/1440-film.webp`, type: 'webp', quality: 85 });
+    const axe = await new AxeBuilder({ page }).analyze();
+    results.accessibility.push({ state: 'film dialog', violations: axe.violations.map(({ id, impact, nodes }) => ({ id, impact, nodes: nodes.map((n) => n.target) })) });
+    assert.equal(axe.violations.length, 0, JSON.stringify(results.accessibility.at(-1)));
+    await page.mouse.click(20, 20);
+    await film.waitFor({ state: 'hidden' });
+    assert.equal(await page.evaluate(() => sessionStorage.getItem('dongle-film-seen')), '1');
+    await page.reload();
+    await page.waitForTimeout(300);
+    assert.equal(await page.locator('dialog[open]').count(), 0);
+    return 'Opens once per session, no autoplay under reduced motion, backdrop click dismisses, reload stays dismissed.';
+  });
 
   for (const width of [320, 390, 700, 701, 768, 960, 1024, 1280, 1440]) {
     await check(`Static subpath and reflow at ${width}px`, async () => {
@@ -87,12 +108,15 @@ try {
     return 'Anchor navigation, expanded state, Escape and focus return passed.';
   });
 
-  await check('Buy flow is honest, modal traps focus and Escape restores trigger', async () => {
+  await check('Buy flow shows the Solana mint, links to machine.fun, traps focus and Escape restores trigger', async () => {
     const buy = page.getByRole('button', { name: 'BUY $DONGLE' });
     await buy.click();
     const dialog = page.getByRole('dialog');
     await dialog.waitFor({ state: 'visible' });
-    assert.match(await dialog.innerText(), /No token has launched and no purchase is available/);
+    assert.equal(await dialog.locator('code').innerText(), '7i5fZty1GFryS5ZWqUFRPstfiQDhvNmoFjwaTqb5w1q7');
+    const trade = dialog.getByRole('link', { name: 'Buy on machine.fun' });
+    assert.equal(await trade.getAttribute('href'), buyUrl);
+    assert.equal(await trade.getAttribute('target'), '_blank');
     for (let i = 0; i < 7; i++) {
       await page.keyboard.press('Tab');
       assert(await dialog.evaluate((el) => el.contains(document.activeElement)));
@@ -104,12 +128,11 @@ try {
     await page.keyboard.press('Escape');
     assert(await buy.evaluate((el) => el === document.activeElement));
     await buy.click();
-    await dialog.getByRole('button', { name: 'Check contract status' }).click();
-    assert.equal(new URL(page.url()).hash, '#contract');
-    assert(await page.getByRole('heading', { name: 'Check the serial number.' }).evaluate((el) => el === document.activeElement));
-    assert.match(await page.locator('#contract').innerText(), /No token has been deployed/);
-    assert.equal(await page.locator('#contract code').count(), 0);
-    return 'No fabricated contract or transaction; modal, focus trap, dismissal and status navigation passed.';
+    await dialog.getByRole('button', { name: 'Back to the factory' }).click();
+    assert(await buy.evaluate((el) => el === document.activeElement));
+    assert.equal(await page.locator('#contract code').innerText(), '7i5fZty1GFryS5ZWqUFRPstfiQDhvNmoFjwaTqb5w1q7');
+    assert.match(await page.locator('#contract').innerText(), /Solana token mint address/);
+    return 'Full mint in dialog and contract section; outbound buy link; modal, focus trap and both dismissals passed.';
   });
 
   await check('Technical specs anchor and simulation pending, success and repeat states', async () => {
@@ -157,6 +180,15 @@ try {
     return '1200 × 630 local PNG downloads; real clipboard readback and denied-permission recovery passed.';
   });
 
+  await check('Mint address copy button copies the full address', async () => {
+    await page.reload();
+    await page.waitForTimeout(300);
+    await page.getByRole('button', { name: 'Copy token mint address' }).click();
+    await page.locator('#contract').getByText('Mint address copied.').waitFor();
+    assert.equal(await page.evaluate(() => navigator.clipboard.readText()), '7i5fZty1GFryS5ZWqUFRPstfiQDhvNmoFjwaTqb5w1q7');
+    return 'Clipboard readback equals the verified mint.';
+  });
+
   for (const width of [390, 1440]) {
     await check(`Automated accessibility scan at ${width}px`, async () => {
       await page.setViewportSize({ width, height: 900 });
@@ -169,6 +201,11 @@ try {
 
   await check('Reduced motion stops graphical animation', async () => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.getByRole('link', { name: 'READ THE TECHNICAL SPECS' }).click();
+    await page.getByRole('button', { name: /Run a torque test|Run it again/ }).click();
+    await page.getByText('Test complete. 2 mm traveled. Ego unchanged.').waitFor();
+    await page.getByRole('button', { name: 'Run it again' }).click();
+    await page.getByText('Mountains moved: 0. Confidence: still 9,000 RPM.').waitFor();
     await page.getByRole('button', { name: 'Run it again' }).click();
     const animations = await page.evaluate(() => document.getAnimations().filter((animation) => animation.playState === 'running').length);
     assert.equal(animations, 0);
@@ -213,6 +250,49 @@ try {
   });
   await context.close();
 
+  const motion = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'no-preference' });
+  const moving = await motion.newPage();
+  moving.setDefaultTimeout(8000);
+  moving.on('pageerror', (error) => results.pageErrors.push(error.message));
+  await check('Intro film autoplays muted at 390px with the buy action on screen', async () => {
+    await moving.goto(url);
+    const film = moving.getByRole('dialog', { name: 'Field test DNG-001' });
+    await film.waitFor({ state: 'visible' });
+    const video = film.locator('video');
+    await moving.waitForFunction(() => document.querySelector('.film-video').currentTime > 1);
+    assert.equal(await video.evaluate((el) => el.muted && el.controls && !el.paused), true);
+    const boxes = { video: await video.boundingBox(), buy: await film.getByRole('button', { name: 'BUY $DONGLE' }).boundingBox(), skip: await film.getByRole('button', { name: 'Skip to the site' }).boundingBox() };
+    for (const box of Object.values(boxes)) assert(box && box.y >= 0 && box.y + box.height <= 844 && box.x >= 0 && box.x + box.width <= 390, JSON.stringify(boxes));
+    await moving.screenshot({ path: `${output}/390-film.webp`, type: 'webp', quality: 85 });
+    await moving.keyboard.press('Escape');
+    await film.waitFor({ state: 'hidden' });
+    assert.equal(await moving.locator('.film-video').evaluate((el) => el.paused), true);
+    return boxes;
+  });
+  await check('Play the film reopens it, Skip returns focus, Buy hands off to the buy dialog', async () => {
+    const trigger = moving.getByRole('button', { name: 'Play the film' });
+    const box = await trigger.boundingBox();
+    assert(box && box.y + box.height <= 844, `Trigger: ${JSON.stringify(box)}`);
+    await trigger.click();
+    const film = moving.getByRole('dialog', { name: 'Field test DNG-001' });
+    await film.waitFor({ state: 'visible' });
+    await moving.waitForFunction(() => !document.querySelector('.film-video').paused);
+    await film.getByRole('button', { name: 'Skip to the site' }).click();
+    await film.waitFor({ state: 'hidden' });
+    assert(await trigger.evaluate((el) => el === document.activeElement));
+    await trigger.click();
+    await film.getByRole('button', { name: 'Close film' }).click();
+    await film.waitFor({ state: 'hidden' });
+    await trigger.click();
+    await film.getByRole('button', { name: 'BUY $DONGLE' }).click();
+    const buyDialog = moving.getByRole('dialog', { name: 'Review the launch details.' });
+    await buyDialog.waitFor({ state: 'visible' });
+    await moving.keyboard.press('Escape');
+    assert(await moving.locator('.hero-actions .primary').evaluate((el) => el === document.activeElement));
+    return 'Replay, skip, close button and buy hand-off passed with focus restored.';
+  });
+  await motion.close();
+
   let safari;
   try {
     safari = await webkit.launch({ headless: true });
@@ -224,6 +304,7 @@ try {
     await check('WebKit mobile primary interactions', async () => {
       const page = await safari.newPage({ viewport: { width: 390, height: 844 } });
       await page.goto(url);
+      await page.getByRole('button', { name: 'Skip to the site' }).click();
       await page.getByRole('button', { name: 'BUY $DONGLE' }).click();
       await page.getByRole('dialog').waitFor({ state: 'visible' });
       await page.keyboard.press('Escape');
